@@ -1,1 +1,2 @@
 require('./Post');
+require('./User');

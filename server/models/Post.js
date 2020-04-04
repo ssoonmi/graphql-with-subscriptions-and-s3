@@ -12,6 +12,11 @@ const PostSchema = new Schema({
   },
   photo: {
     type: String
+  },
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 });
 

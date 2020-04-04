@@ -19,6 +19,32 @@ const graphqlLogger = (shouldLog) => (req, res, next) => {
   return next();
 };
 
+const jwt = require('jsonwebtoken');
+const secretOrKey = require('../config/keys').secretOrKey;
+const mongoose = require('mongoose');
+const User = mongoose.model('User');
+
+async function authenticate(req, res, next) {
+  const token = req.headers.authorization;
+  const user = await verifyUser(token);
+  if (user) req.user = user;
+  next();
+}
+
+async function verifyUser(token) {
+  if (!token) return;
+  const splitToken = token.split('Bearer ')[1];
+  if (!splitToken) return;
+  const decoded = jwt.verify(splitToken, secretOrKey);
+  if (decoded && decoded._id) {
+    const user = await User.findById(decoded._id);
+    if (user) return user;
+  }
+  return;
+}
+
 module.exports = {
-  graphqlLogger
+  graphqlLogger,
+  authenticate,
+  verifyUser
 }

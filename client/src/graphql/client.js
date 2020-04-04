@@ -8,6 +8,9 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { createUploadLink } from 'apollo-upload-client';
 import { onError } from "apollo-link-error";
 
+import { typeDefs, resolvers } from './resolvers';
+import { IS_LOGGED_IN, CURRENT_USER } from './users';
+
 export default async function createClient() {
   const cache = new InMemoryCache({ dataIdFromObject: object => object._id });
 
@@ -20,7 +23,10 @@ export default async function createClient() {
   const wsLink = new WebSocketLink({
     uri: `ws://localhost:5000/subscriptions`,
     options: {
-      reconnect: true
+      reconnect: true,
+      connectionParams: () => ({
+        authorization: localStorage.getItem('token'),
+      }),
     }
   });
 
@@ -63,8 +69,23 @@ export default async function createClient() {
 
   const client = new ApolloClient({
     cache,
-    link: ApolloLink.from([authLink.concat(errorLink), serverLink])
+    link: ApolloLink.from([authLink.concat(errorLink), serverLink]),
+    typeDefs,
+    resolvers
   });
+
+  client.onResetStore(() => {
+    console.log('clearing cache');
+    localStorage.clear();
+  });
+
+  if (localStorage.getItem('token')) {
+    await client
+      .query({ query: CURRENT_USER })
+      .then(({ data }) => {
+        if (!data || !data.me) client.resetStore();
+      });
+  }
 
   return client;
 }

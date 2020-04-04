@@ -1,12 +1,15 @@
 import React from 'react';
-import PostList from '../components/posts/PostList';
+import PostIndex from '../components/posts/PostIndex';
 import CreatePostForm from '../components/posts/CreatePostForm';
+import ProtectedComponent from '../components/util/ProtectedComponent';
+import NavBar from '../components/navbar/NavBar';
 
 export default () => {
   return (
     <>
-      <CreatePostForm />
-      <PostList />
+      <NavBar />
+      <ProtectedComponent component={CreatePostForm} />
+      <PostIndex />
     </>
   );
 };

@@ -4,7 +4,7 @@ require('./models');
 const morgan = require("morgan");
 const graphqlHTTP = require('express-graphql');
 const { graphqlUploadExpress } = require('graphql-upload');
-const { graphqlLogger } = require('./middlewares');
+const { graphqlLogger, authenticate, verifyUser } = require('./middlewares');
 
 const { execute, subscribe } = require('graphql');
 const { createServer } = require('http');
@@ -33,6 +33,7 @@ const subscriptionsEndpoint = `ws://localhost:${PORT}/subscriptions`;
 app.use(
   '/graphql',
   graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }),
+  authenticate,
   graphqlLogger(true),
   graphqlHTTP({
     schema,
@@ -55,7 +56,20 @@ webServer.listen(PORT, () => {
   new SubscriptionServer({
     execute,
     subscribe,
-    schema
+    schema,
+    onConnect: (connectionParams) => {
+      if (connectionParams.authorization) {
+        return verifyUser(connectionParams.authorization)
+          .then((user) => {
+            return {
+              user,
+            };
+          });
+      }
+    },
+    onDisconnect: (websocket, context) => {
+      console.log("WS Disconnected!");
+    }
   }, {
     server: webServer,
     path: '/subscriptions',

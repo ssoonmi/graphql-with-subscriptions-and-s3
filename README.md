@@ -1,12 +1,12 @@
 # Subscriptions with Express-GraphQL and Apollo Client
 
-A `subscription` is another type of GraphQL request on top of `query` and `mutation`. Subscriptions in GraphQL use websockets instead of HTTP requests.
+A `subscription` is another type of GraphQL request on top of `query` and `mutation`. Subscriptions in GraphQL should be sent using websockets instead of HTTP requests.
 
 A websocket is a long-term connection between a server and a client vs HTTP requests which end once the client receives the request from the server. 
 
 A server can continuously push information from server to client over an established WebSocket connection. Whereas, the server can only send information if the client specifically asks for it. For this reason, websockets are primarily used for sending real-time information.
 
-To make a WebSocket connection using GraphQL, we need to make our client make `subscriptions` to listen to specific information from our server.
+To make a WebSocket connection using GraphQL, we need to make our client to listen to specific information from our server by `subscribing`.
 
 ## Set Up
 
